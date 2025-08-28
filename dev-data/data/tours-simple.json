@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "name": "Paris City Lights",
+    "location": "Paris, France",
+    "duration_days": 5,
+    "price_usd": 1200,
+    "highlights": ["Eiffel Tower", "Louvre Museum", "Seine River Cruise"]
+  },
+  {
+    "id": 2,
+    "name": "Safari Adventure",
+    "location": "Maasai Mara, Kenya",
+    "duration_days": 7,
+    "price_usd": 2500,
+    "highlights": [
+      "Big Five Game Drive",
+      "Hot Air Balloon Ride",
+      "Cultural Village Visit"
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Tokyo Explorer",
+    "location": "Tokyo, Japan",
+    "duration_days": 6,
+    "price_usd": 1800,
+    "highlights": ["Shibuya Crossing", "Tokyo Skytree", "Sushi Workshop"]
+  },
+  {
+    "id": 4,
+    "name": "Ancient Wonders of Egypt",
+    "location": "Cairo & Luxor, Egypt",
+    "duration_days": 8,
+    "price_usd": 2100,
+    "highlights": ["Pyramids of Giza", "Nile Cruise", "Valley of the Kings"]
+  },
+  {
+    "id": 5,
+    "name": "Amazon Rainforest Expedition",
+    "location": "Manaus, Brazil",
+    "duration_days": 10,
+    "price_usd": 3000,
+    "highlights": ["Wildlife Trek", "River Boat Tour", "Canopy Walk"]
+  },
+  {
+    "id": 6,
+    "name": "Northern Lights Experience",
+    "location": "Reykjavik, Iceland",
+    "duration_days": 4,
+    "price_usd": 1600,
+    "highlights": [
+      "Aurora Borealis Viewing",
+      "Blue Lagoon",
+      "Golden Circle Tour"
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Great Wall Trek",
+    "location": "Beijing, China",
+    "duration_days": 5,
+    "price_usd": 1400,
+    "highlights": [
+      "Mutianyu Section Hike",
+      "Forbidden City",
+      "Temple of Heaven"
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Mediterranean Cruise",
+    "location": "Barcelona, Spain to Rome, Italy",
+    "duration_days": 12,
+    "price_usd": 3500,
+    "highlights": ["Greek Islands", "French Riviera", "Italian Coastline"]
+  },
+  {
+    "id": 9,
+    "name": "Rocky Mountains Adventure",
+    "location": "Banff & Jasper, Canada",
+    "duration_days": 6,
+    "price_usd": 1700,
+    "highlights": ["Lake Louise", "Icefields Parkway", "Wildlife Safari"]
+  },
+  { "id": 11, "name": "tour 1", "location": "Patna", "duration_days": 6 },
+  { "id": 13, "name": "tour 3", "location": "Patna", "duration_days": 6 },
+  { "id": 14, "name": "tour 3", "location": "Patna", "duration_days": 6 },
+  { "id": 15, "name": "tour 3", "location": "Patna", "duration_days": 6 },
+  { "id": 16, "name": "tour 3", "location": "Indore", "duration_days": 6 },
+  { "id": 17, "name": "tour 3", "location": "Delhi", "duration_days": 6 }
+]

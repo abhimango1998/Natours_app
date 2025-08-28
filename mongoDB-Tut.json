@@ -1,0 +1,88 @@
+use natours-test;
+
+db.tours.insertOne({name: "First tour", price: 23});
+
+db.tours.find();
+
+db.tours.insertMany([
+    {name: "Visit London", price: 299, rating: 4.6},
+    {name: "The snow adv", price: 231, rating: 3.6, difficulty: 'easy'}
+]);
+
+show collections;
+
+db.tours.find({
+    name: "The snow adv"
+});
+
+db.tours.find({
+    difficulty: 'easy'
+});
+
+db.tours.find({
+    price: {$lte: 100} // --> Less than or equal too
+});
+
+db.tours.find({
+    price: {$lt: 100} // lt --> Less than
+});
+
+db.tours.find({
+    price: {$gte: 100}, rating: {$gte: 4} // multiple filters, this is AND query
+});
+
+db.tours.find({
+    $or: [
+        {price: {$gt: 200}},
+        { rating: {$gte: 4}}
+    ]
+});
+
+db.tours.find({
+    $or: [
+        {price: {$gt: 200}},
+        { rating: {$gte: 4}}
+    ]
+}, { name: 1, _id: 0 }); // projection (select specific fields, show name, hide _id)
+
+// UPDATE QUERY
+db.tours.updateOne({
+    name: "First tour"
+}, {$set: {
+    price: 444 
+}});
+
+db.tours.updateOne({
+    name: "First tour"
+}, {$set: {
+    price: 444,
+    name: "Sky Fall Hill" // updating multiple fields
+}});
+
+db.tours.updateOne({
+    name: "Sky Fall Hill"
+}, {$set: {
+   rating: 4.2
+}});
+
+db.tours.updateOne({
+    price: {$gte: 400}, rating: {$gte: 4}
+}, 
+{
+    $set: {premium: true}
+}
+);
+
+db.tours.find({
+    premium: true
+})
+
+db.tours.deleteOne({premium: true});
+
+db.tours.deleteMany({
+    rating: {
+        $lte: 4
+    }
+})
+
+db.tours.deleteMany({}) // this deletes all the documents
