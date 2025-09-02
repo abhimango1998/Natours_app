@@ -12,11 +12,14 @@
   "author": "Abhishek",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.1",
     "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.0",
     "morgan": "^1.10.1",
-    "slugify": "^1.6.6"
+    "slugify": "^1.6.6",
+    "validator": "^13.15.15"
   },
   "devDependencies": {
     "eslint": "^8.57.1",

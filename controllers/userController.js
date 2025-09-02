@@ -1,19 +1,22 @@
 const fs = require("fs");
+const catchAsync = require("../utils/catchAsync");
+const User = require("../models/userModel");
 
 const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
+  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
 );
 
-exports.getUsers = (req, res) => {
+exports.getUsers = catchAsync(async (req, res, next) => {
+  const users = await User.find();
+
   res.status(200).json({
     status: "success",
-    time_of_request: req.requestTime,
-    results: tours.length,
+    results: users.length,
     data: {
-      tours: tours,
+      users,
     },
   });
-};
+});
 
 exports.createUser = (req, res) => {
   const newId = tours[tours.length - 1].id + 1;
@@ -30,7 +33,7 @@ exports.createUser = (req, res) => {
           tour: newTour,
         },
       });
-    }
+    },
   );
 };
 
@@ -95,6 +98,6 @@ exports.deleteUser = (req, res) => {
         status: "success",
         data: null,
       });
-    }
+    },
   );
 };
