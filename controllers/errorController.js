@@ -26,7 +26,7 @@ const sendErrorOnProduction = (err, res) => {
       message: err.message,
     });
 
-    // Programming or other unknown error: don't leak error details
+    // Programming or other unknown error done by developers: don't leak error details
   } else {
     // 1) Log error
     console.error("ERROR:", err);
@@ -48,6 +48,7 @@ const sendErrorOnDevelopment = (err, res) => {
   });
 };
 
+// Global error handler
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";

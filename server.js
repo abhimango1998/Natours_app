@@ -3,6 +3,12 @@ const mongoose = require("mongoose");
 
 dotenv.config({ path: "./config.env" });
 
+process.on("uncaughtException", (err) => {
+  console.log("-----UNCAUGHT EXCEPTION!-----SHUTTING DONW SERVER");
+  console.log(err.name, err.message);
+  process.exit(1); // craching app is mandatory
+});
+
 const app = require("./app");
 
 const DBStr = process.env.DATABASE.replace(
@@ -10,13 +16,17 @@ const DBStr = process.env.DATABASE.replace(
   process.env.DATABASE_PASSWORD,
 );
 
-mongoose
-  .connect(DBStr)
-  .then(() => console.log("DB connection successful!"))
-  .catch((err) => console.error("DB connection error:", err));
+mongoose.connect(DBStr).then(() => console.log("DB connection successful!"));
+// .catch((err) => console.error("DB connection error:", err));
 
 const port = process.env.PORT || 8000;
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.log("-----UNHANDLED REJECTION!-----SHUTTING DONW SERVER");
+  console.log(err.name, err.message);
+  server.close(() => process.exit(1)); // craching app is optional
 });
