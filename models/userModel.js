@@ -51,6 +51,13 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password") || this.isNew) return next();
+  // subtracting 1 sec in past will ensure that the token is always created after the password has been changed
+  this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
 // Instance Method: This method is available on all documents of a certain collection
 userSchema.methods.correctPassword = async function (
   candidatePassword,
@@ -76,9 +83,7 @@ userSchema.methods.createPasswordResetToken = function () {
     .update(resetToken)
     .digest("hex");
 
-  console.log({ resetToken }, this.passwordResetToken);
-
-  this.passwordRestExpires = Date.now() + 10 * 60 * 1000;
+  this.passwordRestExpires = Date.now() + 20 * 60 * 1000;
 
   return resetToken;
 };

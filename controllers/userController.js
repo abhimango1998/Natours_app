@@ -57,8 +57,8 @@ exports.getUser = (req, res) => {
 };
 
 exports.updateUser = (req, res) => {
-  const id = parseInt(req.params.id);
-  const { name, duration_days } = req.body;
+  const id = parseInt(req.params.id, 10);
+  const { name } = req.body;
   const tour = tours.find((t) => t.id === id);
 
   if (!tour) {
@@ -66,9 +66,6 @@ exports.updateUser = (req, res) => {
       status: "fail",
       message: `Tour with ID: ${id} is not found!`,
     });
-  }
-
-  if (name) {
   }
 
   res.status(200).json({
@@ -80,7 +77,7 @@ exports.updateUser = (req, res) => {
 };
 
 exports.deleteUser = (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id, 10);
 
   if (id > tours.length) {
     return res.status(404).json({
