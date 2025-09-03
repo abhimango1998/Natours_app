@@ -5,7 +5,8 @@ const fs = require("fs");
 const mongoose = require("mongoose");
 const Tour = require("../models/tourModel");
 
-const filePath = `${__dirname}/data/tours-simple.json`;
+// const filePath = `${__dirname}/data/tours-simple.json`;
+const filePath = `${__dirname}/data/tours.json`;
 
 const toursJson = JSON.parse(fs.readFileSync(filePath, "utf-8"));
 
