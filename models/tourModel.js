@@ -105,6 +105,12 @@ const tourSchema = new mongoose.Schema(
         day: Number,
       },
     ],
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
     toJSON: { virtuals: true },
@@ -114,6 +120,14 @@ const tourSchema = new mongoose.Schema(
 
 tourSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7;
+});
+
+// Virtual Populate
+tourSchema.virtual("reviews", {
+  ref: "Review", // name of model which i want to reference
+  //Below: Specifying the name of the fields in order to connect to data sets
+  foreignField: "tour", // name of the field in other model (Review in this case which has tour field)
+  localField: "_id", // where is the id stored, here in this current model (Tour)
 });
 
 // Document middleware: runs before .save() and .create() but not for insertMany();
@@ -140,6 +154,14 @@ tourSchema.pre("find", function (next) {
 tourSchema.pre(/^find/, function (next) {
   this.find({ secretTour: { $ne: true } });
   this.start = Date.now(); // setting new property on this
+  next();
+});
+
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "guides",
+    select: "-__v -passwordChangedAt",
+  });
   next();
 });
 

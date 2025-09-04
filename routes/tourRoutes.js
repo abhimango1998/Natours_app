@@ -11,11 +11,18 @@ const {
   // checkBody,
 } = require("../controllers/tourController");
 const { protect, restrictTo } = require("../controllers/authController");
+const reviewRouter = require("./reviewRoutes");
 
 const router = express.Router();
 
 // PARAM middleware
 // router.param("id", checkID);
+
+// router
+//   .route("/:tourId/reviews")
+//   .post(protect, restrictTo("user"), createReview);
+
+router.use("/:tourId/reviews", reviewRouter);
 
 router.route("/").get(protect, getTours).post(createTour);
 router.route("/tour-stats").get(getTourStats);
