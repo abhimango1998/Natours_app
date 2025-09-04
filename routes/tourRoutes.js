@@ -24,14 +24,19 @@ const router = express.Router();
 
 router.use("/:tourId/reviews", reviewRouter);
 
-router.route("/").get(protect, getTours).post(createTour);
+router
+  .route("/")
+  .get(getTours)
+  .post(protect, restrictTo("admin", "lead-guide"), createTour);
 router.route("/tour-stats").get(getTourStats);
-router.route("/monthly-plan/:year").get(getMonthlyPlans);
+router
+  .route("/monthly-plan/:year")
+  .get(protect, restrictTo("admin", "lead-guide", "guide"), getMonthlyPlans);
 router.route("/top-5-cheapest-tours").get(getTop5CheapestTours, getTours);
 router
   .route("/:id")
   .get(getTour)
-  .patch(updateTour)
+  .patch(protect, restrictTo("admin", "lead-guide"), updateTour)
   .delete(protect, restrictTo("admin", "lead-guide"), deleteTour);
 
 module.exports = router;
