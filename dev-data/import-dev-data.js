@@ -1,14 +1,25 @@
 // This file is responsible to import and delete data in database only
+// - Import fresh data command --> node .\dev-data\import-dev-data.js --import
+// - Delete all data command --> node .\dev-data\import-dev-data.js --delete
 
 const dotenv = require("dotenv");
 const fs = require("fs");
 const mongoose = require("mongoose");
 const Tour = require("../models/tourModel");
+const User = require("../models/userModel");
+const Review = require("../models/reviewModel");
 
-// const filePath = `${__dirname}/data/tours-simple.json`;
-const filePath = `${__dirname}/data/tours.json`;
+const toursJson = JSON.parse(
+  fs.readFileSync(`${__dirname}/data/tours.json`, "utf-8"),
+);
 
-const toursJson = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+const reviewsJson = JSON.parse(
+  fs.readFileSync(`${__dirname}/data/reviews.json`, "utf-8"),
+);
+
+const usersJson = JSON.parse(
+  fs.readFileSync(`${__dirname}/data/users.json`, "utf-8"),
+);
 
 dotenv.config({ path: "./config.env" });
 
@@ -26,7 +37,9 @@ mongoose
 const importData = async () => {
   try {
     await Tour.create(toursJson);
-    console.log("Tours data imported successfylly!");
+    await User.create(usersJson, { validateBeforeSave: false });
+    await Review.create(reviewsJson);
+    console.log("Whole data imported successfully!");
   } catch (error) {
     console.log("Error while importing data:", error.message);
   }
@@ -36,7 +49,9 @@ const importData = async () => {
 const deleteData = async () => {
   try {
     await Tour.deleteMany();
-    console.log("Tours data deleted successfylly!");
+    await User.deleteMany();
+    await Review.deleteMany();
+    console.log("Whole data deleted successfully!");
   } catch (error) {
     console.log("Error while deleting data:", error.message);
   }

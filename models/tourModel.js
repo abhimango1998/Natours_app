@@ -36,6 +36,7 @@ const tourSchema = new mongoose.Schema(
       default: 4.5,
       min: [1, "Rating must be above 1.0"],
       max: [5, "Rating must be less or equal to 5.0"],
+      set: (val) => Math.round(val * 10) / 10, // rounds to 1 decimal
     },
     ratingsQuantity: {
       type: Number,
@@ -81,7 +82,7 @@ const tourSchema = new mongoose.Schema(
       default: false,
     },
     // startLoaction is not schema type, it is an embeded object
-    startLoaction: {
+    startLocation: {
       // mongoDB uses GeoJSON in order to specify geospatial data
       type: {
         type: String,
@@ -117,6 +118,11 @@ const tourSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   },
 );
+
+// tourSchema.index({ price: 1 }); // <-- Indexing
+tourSchema.index({ price: 1, ratingsAverage: -1 }); // <-- Compound indexing
+tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: "2dsphere" });
 
 tourSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7;
