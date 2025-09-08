@@ -207,8 +207,6 @@ exports.getToursWithin = catchAsync(async (req, res, next) => {
     );
   }
 
-  console.log("-----------", distance, lat, lng, unit);
-
   const tours = await Tour.find({
     startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
   });
@@ -218,6 +216,50 @@ exports.getToursWithin = catchAsync(async (req, res, next) => {
     result: tours.length,
     data: {
       data: tours,
+    },
+  });
+});
+
+// This controller would be used in any feature where a user needs to see how far certain tours (or locations) are from their current position.
+exports.getDistances = catchAsync(async (req, res, next) => {
+  const { latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(",");
+
+  const multiplier = unit === "mi" ? 0.000621371 : 0.001;
+
+  if (!lat || !lng) {
+    return next(
+      new AppError(
+        "Please provide latitude and longitude in this format --> lat,lng",
+        404,
+      ),
+    );
+  }
+
+  const distances = await Tour.aggregate([
+    {
+      $geoNear: {
+        near: {
+          type: "Point",
+          coordinates: [lat * 1, lng * 1],
+        },
+        distanceField: "distance",
+        distanceMultiplier: multiplier,
+      },
+    },
+    {
+      $project: {
+        distance: 1,
+        name: 1,
+      },
+    },
+  ]);
+
+  res.status(200).json({
+    status: "success",
+    result: distances.length,
+    data: {
+      data: distances,
     },
   });
 });

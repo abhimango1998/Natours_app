@@ -176,11 +176,11 @@ tourSchema.post(/^find/, function (docs, next) {
   next();
 });
 
-tourSchema.pre("aggregate", function (next) {
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-  console.log("agg this:", this.pipeline());
-  next();
-});
+// tourSchema.pre("aggregate", function (next) {
+//   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//   console.log("agg this:", this.pipeline());
+//   next();
+// });
 
 // creating model from above mongoose schema
 const Tour = mongoose.model("Tour", tourSchema);
