@@ -18,8 +18,11 @@ const {
   protect,
   restrictTo,
 } = require("../controllers/authController");
+// const multer = require("multer");
 
 const router = express.Router();
+
+// const upload = multer({ dest: "public/img/users" }); // Configure multer to save uploaded files to a specific directory
 
 // auth routes, login token not required
 router.post("/signup", signup);

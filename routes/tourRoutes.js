@@ -10,6 +10,7 @@ const {
   getMonthlyPlans,
   getToursWithin,
   getDistances,
+  getTourBySlug,
   // checkBody,
 } = require("../controllers/tourController");
 const { protect, restrictTo } = require("../controllers/authController");
@@ -30,7 +31,10 @@ router
   .route("/")
   .get(getTours)
   .post(protect, restrictTo("admin", "lead-guide"), createTour);
+
 router.route("/tour-stats").get(getTourStats);
+
+router.get("/:slug", protect, getTourBySlug);
 
 router
   .route("/monthly-plan/:year")

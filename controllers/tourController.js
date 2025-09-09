@@ -62,6 +62,22 @@ exports.createTour = factory.createOne(Tour);
 
 exports.getTour = factory.getOne(Tour, { path: "reviews" });
 
+exports.getTourBySlug = catchAsync(async (req, res, next) => {
+  const { slug } = req.params;
+  const tour = await Tour.findOne({ slug }).populate("reviews");
+
+  if (!tour) {
+    return next(new AppError("No tour found with that slug", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      tour,
+    },
+  });
+});
+
 // exports.updateTour = catchAsync(async (req, res, next) => {
 //   const { id } = req.params;
 //   const tour = await Tour.findByIdAndUpdate(id, req.body, {

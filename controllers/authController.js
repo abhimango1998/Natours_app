@@ -7,11 +7,11 @@ const AppError = require("../utils/appError");
 const sendEmail = require("../utils/email");
 
 const cookieOptions = {
-  expires: new Date(
-    Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
-  ),
-  secure: process.env.NODE_ENV !== "development",
+  maxAge: 90 * 24 * 60 * 60 * 1000,
   httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  path: "/",
 };
 
 const signToken = (id) =>
@@ -46,6 +46,7 @@ exports.signup = catchAsync(async (req, res, next) => {
 });
 
 exports.login = catchAsync(async (req, res, next) => {
+  console.log("------------------------doing login");
   const { email, password } = req.body;
   // 1) Check if email and password exists
   if (!email || !password) {
@@ -71,6 +72,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith("Bearer")
   ) {
     token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
 
   if (!token) {

@@ -5,6 +5,8 @@ const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const userRouter = require("./routes/userRoutes");
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
@@ -14,6 +16,13 @@ const reviewRouter = require("./routes/reviewRoutes");
 const app = express();
 
 // GLOBAL MIDDLEWARES
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  }),
+);
+
 // Set security HTTP Headers
 app.use(helmet());
 
@@ -32,6 +41,7 @@ app.use("/api", limiter);
 
 // Middleware to parse JSON bodies, and then makes available in req.body
 app.use(express.json({ limit: "10kb" }));
+app.use(cookieParser());
 
 // Middlewares for --> Data sanitization
 // Data sanitization against NoSql query injection
