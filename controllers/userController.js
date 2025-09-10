@@ -1,3 +1,7 @@
+const multer = require("multer");
+const sharp = require("sharp");
+const cloudinary = require("../cloudinaryConfig");
+
 const catchAsync = require("../utils/catchAsync");
 const User = require("../models/userModel");
 const AppError = require("../utils/appError");
@@ -12,15 +16,88 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
+// const multerStorage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "public/img/users");
+//   },
+
+//   filename: (req, file, cb) => {
+//     const ext = file.mimetype.split("/")[1];
+//     cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+//   },
+// });
+
+const multerStorage = multer.memoryStorage();
+
+// Only accept image, test if uploaded file is image or not
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) {
+    cb(null, true); // 1st args is for error, 2nd is for success
+  } else {
+    cb(new AppError("Not an image! Please upload only images.", 400), false);
+  }
+};
+
+// Configure multer to save uploaded files to a specific directory
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+exports.uploadUserPhoto = upload.single("photo");
+
+exports.resizeUserPhoto = (req, res, next) => {
+  if (!req.file) return next();
+
+  // setting filename to req.file object, so that we can save it to database in updateMe controller
+  req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+
+  sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat("jpeg")
+    .jpeg({ quality: 90 })
+    .toBuffer()
+    .then((data) => {
+      // Upload to Cloudinary
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: "users",
+          public_id: `user-${req.user.id}-${Date.now()}`,
+          format: "jpeg",
+        },
+        (error, result) => {
+          if (error) {
+            return next(
+              new AppError(`Cloudinary upload failed: ${error.message}`, 500),
+            );
+          }
+          req.file.cloudinaryUrl = result.secure_url;
+          next();
+        },
+      );
+      stream.end(data);
+    })
+    .catch((err) =>
+      next(new AppError(`Image processing failed: ${err.message}`, 500)),
+    );
+};
+
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1) Create error if user post password
   const { password, confirmPassword } = req.body;
   if (password || confirmPassword) {
-    return next(new AppError("You cannot update password from here!", 400));
+    return next(
+      new AppError(
+        "You cannot update password from here!. Please use /updatePassword endpoint",
+        400,
+      ),
+    );
   }
 
   // 2) Filtered out unwanted fileds name that are not allowed to be updated
   const filteredBody = filterObj(req.body, "name", "email");
+  if (req.file && req.file.cloudinaryUrl)
+    filteredBody.photo = req.file.cloudinaryUrl;
 
   // 3) Send response
   const user = await User.findByIdAndUpdate(req.user.id, filteredBody, {

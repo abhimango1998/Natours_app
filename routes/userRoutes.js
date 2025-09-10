@@ -1,4 +1,5 @@
 const express = require("express");
+
 const {
   getUsers,
   createUser,
@@ -8,6 +9,8 @@ const {
   updateMe,
   deleteMe,
   getMe,
+  uploadUserPhoto,
+  resizeUserPhoto,
 } = require("../controllers/userController");
 const {
   signup,
@@ -17,23 +20,22 @@ const {
   updatePassword,
   protect,
   restrictTo,
+  logout,
 } = require("../controllers/authController");
-// const multer = require("multer");
 
 const router = express.Router();
-
-// const upload = multer({ dest: "public/img/users" }); // Configure multer to save uploaded files to a specific directory
 
 // auth routes, login token not required
 router.post("/signup", signup);
 router.post("/login", login);
+router.post("/logout", logout);
 router.post("/forgotPassword", forgotPassword);
 router.patch("/resetPassword/:token", resetPassword);
 
 router.use(protect); // This middleware runs for all lines of code which are below of it
 
 router.patch("/updatePassword", updatePassword);
-router.patch("/updateMe", updateMe);
+router.patch("/updateMe", uploadUserPhoto, resizeUserPhoto, updateMe);
 router.delete("/deleteMe", deleteMe);
 router.route("/me").get(getMe, getUser);
 
