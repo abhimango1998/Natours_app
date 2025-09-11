@@ -1,7 +1,10 @@
+const multer = require("multer");
+const sharp = require("sharp");
 const Tour = require("../models/tourModel");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 const factory = require("./handlerFactory");
+const { uploadToCloudinary } = require("../utils/uploadToCloudinary");
 
 exports.getTop5CheapestTours = (req, res, next) => {
   req.query.limit = 5;
@@ -9,6 +12,78 @@ exports.getTop5CheapestTours = (req, res, next) => {
   req.query.fields = "name,price,ratingsAverage,summary,difficulty";
   next();
 };
+
+const multerStorage = multer.memoryStorage();
+
+// Only accept image, test if uploaded file is image or not
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) {
+    cb(null, true); // 1st args is for error, 2nd is for success
+  } else {
+    cb(new AppError("Not an image! Please upload only images.", 400), false);
+  }
+};
+
+// Configure multer to save uploaded files to a specific directory
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+// For uploading multiple images with different field names
+exports.uploadTourImages = upload.fields([
+  { name: "imageCover", maxCount: 1 },
+  { name: "images", maxCount: 3 },
+]);
+
+// If only one image field, and that can be multiple images
+// upload.array("images", 5); // req.files
+// If only one image field, and that is single image
+// upload.single("image"); // req.file
+
+exports.resizeTourImages = catchAsync(async (req, res, next) => {
+  if (!req.files) return next();
+
+  // 1) Process cover image
+  // setting filename to req.file object, so that we can save it to database in updateMe controller
+  const fileName = `tour-${req.files.imageCover[0]}-${Date.now()}.jpeg`;
+
+  const buffer = await sharp(req.files.imageCover[0].buffer)
+    .resize(2000, 1333)
+    .toFormat("jpeg")
+    .jpeg({ quality: 90 })
+    .toBuffer();
+
+  // Upload to Cloudinary
+  const coverImgUpload = await uploadToCloudinary(buffer, "tours", fileName);
+  req.body.imageCover = coverImgUpload.secure_url;
+
+  // 2) Process gallery images (multiple)
+  req.body.images = [];
+  const imagesUploads = await Promise.all(
+    req.files.images.map(async (file, i) => {
+      const filename = `tour-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
+
+      const imagesBuffer = await sharp(file.buffer)
+        .resize(2000, 1333)
+        .toFormat("jpeg")
+        .jpeg({ quality: 90 })
+        .toBuffer();
+
+      // Upload to Cloudinary
+      const imgUpload = await uploadToCloudinary(
+        imagesBuffer,
+        "tours",
+        filename,
+      );
+
+      return imgUpload.secure_url;
+    }),
+  );
+
+  req.body.images = imagesUploads;
+  next();
+});
 
 // exports.getTours = catchAsync(async (req, res, next) => {
 //   // EXECUTE QUERY

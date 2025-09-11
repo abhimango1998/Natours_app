@@ -11,6 +11,8 @@ const {
   getToursWithin,
   getDistances,
   getTourBySlug,
+  uploadTourImages,
+  resizeTourImages,
   // checkBody,
 } = require("../controllers/tourController");
 const { protect, restrictTo } = require("../controllers/authController");
@@ -45,7 +47,13 @@ router.route("/top-5-cheapest-tours").get(getTop5CheapestTours, getTours);
 router
   .route("/:id")
   .get(getTour)
-  .patch(protect, restrictTo("admin", "lead-guide"), updateTour)
+  .patch(
+    protect,
+    restrictTo("admin", "lead-guide"),
+    uploadTourImages,
+    resizeTourImages,
+    updateTour,
+  )
   .delete(protect, restrictTo("admin", "lead-guide"), deleteTour);
 
 router

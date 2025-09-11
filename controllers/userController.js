@@ -1,11 +1,11 @@
 const multer = require("multer");
 const sharp = require("sharp");
-const cloudinary = require("../cloudinaryConfig");
 
 const catchAsync = require("../utils/catchAsync");
 const User = require("../models/userModel");
 const AppError = require("../utils/appError");
 const factory = require("./handlerFactory");
+const { uploadToCloudinary } = require("../utils/uploadToCloudinary");
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -46,41 +46,23 @@ const upload = multer({
 
 exports.uploadUserPhoto = upload.single("photo");
 
-exports.resizeUserPhoto = (req, res, next) => {
+exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
   if (!req.file) return next();
 
   // setting filename to req.file object, so that we can save it to database in updateMe controller
-  req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+  const fileName = `user-${req.user.id}-${Date.now()}.jpeg`;
 
-  sharp(req.file.buffer)
+  const buffer = await sharp(req.file.buffer)
     .resize(500, 500)
     .toFormat("jpeg")
     .jpeg({ quality: 90 })
-    .toBuffer()
-    .then((data) => {
-      // Upload to Cloudinary
-      const stream = cloudinary.uploader.upload_stream(
-        {
-          folder: "users",
-          public_id: `user-${req.user.id}-${Date.now()}`,
-          format: "jpeg",
-        },
-        (error, result) => {
-          if (error) {
-            return next(
-              new AppError(`Cloudinary upload failed: ${error.message}`, 500),
-            );
-          }
-          req.file.cloudinaryUrl = result.secure_url;
-          next();
-        },
-      );
-      stream.end(data);
-    })
-    .catch((err) =>
-      next(new AppError(`Image processing failed: ${err.message}`, 500)),
-    );
-};
+    .toBuffer();
+
+  // Upload to Cloudinary
+  const result = await uploadToCloudinary(buffer, "users", fileName);
+  req.file.filename = result.secure_url;
+  next();
+});
 
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1) Create error if user post password
@@ -96,8 +78,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 
   // 2) Filtered out unwanted fileds name that are not allowed to be updated
   const filteredBody = filterObj(req.body, "name", "email");
-  if (req.file && req.file.cloudinaryUrl)
-    filteredBody.photo = req.file.cloudinaryUrl;
+  if (req.file && req.file.filename) filteredBody.photo = req.file.filename;
 
   // 3) Send response
   const user = await User.findByIdAndUpdate(req.user.id, filteredBody, {
