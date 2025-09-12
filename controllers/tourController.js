@@ -45,7 +45,7 @@ exports.resizeTourImages = catchAsync(async (req, res, next) => {
   if (!req.files) return next();
 
   // 1) Process cover image
-  // setting filename to req.file object, so that we can save it to database in updateMe controller
+  // setting filename to req.file object, so that we can save it to database
   const fileName = `tour-${req.files.imageCover[0]}-${Date.now()}.jpeg`;
 
   const buffer = await sharp(req.files.imageCover[0].buffer)

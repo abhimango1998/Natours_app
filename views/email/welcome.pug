@@ -1,0 +1,59 @@
+doctype html
+html
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Welcome Email
+    style.
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f7;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        background: #ffffff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      }
+      .header {
+        background-color: #4CAF50;
+        color: white;
+        text-align: center;
+        padding: 20px;
+      }
+      .content {
+        padding: 30px;
+        color: #333;
+        line-height: 1.6;
+      }
+      .btn {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 12px 20px;
+        background-color: #4CAF50;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        font-size: 12px;
+        color: #777;
+      }
+  body
+    .container
+      .header
+        h1 Welcome, #{firstName}!
+      .content
+        p Hi #{firstName},
+        p We’re excited to have you join us! Your account has been created successfully, and you’re all set to explore everything we offer.
+        p To get started, click the button below:
+        a.btn(href=url) Get Started, update your profile.
+        p If you have any questions, just reply to this email — we’re always happy to help.
+      .footer
+        p &copy; #{year} Your Company. All rights reserved.

@@ -4,7 +4,7 @@ const { promisify } = require("util");
 const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
-const sendEmail = require("../utils/email");
+const Email = require("../utils/email");
 
 const cookieOptions = {
   maxAge: 90 * 24 * 60 * 60 * 1000,
@@ -42,11 +42,13 @@ exports.signup = catchAsync(async (req, res, next) => {
     role: req.body.role,
   });
 
+  const url = `${process.env.FRONTEND_URL}/profile`;
+  await new Email(newUser, url).sendWelcome();
+
   createAndSendToken(newUser, 201, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
-  console.log("------------------------doing login");
   const { email, password } = req.body;
   // 1) Check if email and password exists
   if (!email || !password) {
@@ -147,16 +149,10 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   // 3) Send it to user's email
-  // const resetUrl = `${req.protocol}://${req.get("host")}/api/v1/users/resetPassword/${resetToken}`;
-  const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetUrl}.\nIf You didn't forget your password, please ignore this email`;
-
   try {
-    await sendEmail({
-      email: user.email,
-      subject: "Your password reset token is valid only for 10 minutes.",
-      message,
-    });
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+    await new Email(user, resetUrl).sendPasswordReset();
 
     res.status(200).json({
       status: "success",

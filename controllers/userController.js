@@ -56,7 +56,7 @@ exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
     .resize(500, 500)
     .toFormat("jpeg")
     .jpeg({ quality: 90 })
-    .toBuffer();
+    .toBuffer(); //.toBuffer() tells Sharp to return the processed image data as a Node.js Buffer object.
 
   // Upload to Cloudinary
   const result = await uploadToCloudinary(buffer, "users", fileName);
