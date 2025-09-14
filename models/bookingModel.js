@@ -27,11 +27,12 @@ const bookingSchema = new mongoose.Schema(
 );
 
 // populating user, tour on all query
-bookingSchema.pre(/^find/, function () {
+bookingSchema.pre(/^find/, function (next) {
   this.populate("user").populate({
     path: "tour",
     select: "name",
   });
+  next();
 });
 
 const Booking = mongoose.model("Booking", bookingSchema);

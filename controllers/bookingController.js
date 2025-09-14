@@ -1,6 +1,7 @@
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const Booking = require("../models/bookingModel");
 const Tour = require("../models/tourModel");
 const catchAsync = require("../utils/catchAsync");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 exports.createCheckoutSession = catchAsync(async (req, res, next) => {
   // 1) Get currently booked tour
@@ -11,7 +12,7 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
     // session info
     payment_method_types: ["card"],
     mode: "payment",
-    success_url: process.env.FRONTEND_URL,
+    success_url: `${process.env.FRONTEND_URL}?tour=${req.params.tourID}&user=${req.user.id}&price=${tour.price}`,
     cancel_url: `${process.env.FRONTEND_URL}/${tour.slug}`,
     customer_email: req.user.email,
     client_reference_id: req.params.tourID,
@@ -38,5 +39,34 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: "success",
     session,
+  });
+});
+
+exports.createBookingCheckout = catchAsync(async (req, res, next) => {
+  // TODO: It is temporary
+  const { tour, user, price } = req.query;
+  if (!tour || !user || !price) return next();
+  const booking = await Booking.create({ tour, user, price });
+
+  res.status(201).json({
+    status: "success",
+    booking,
+  });
+});
+
+exports.getAllBookedTours = catchAsync(async (req, res, next) => {
+  // 1. Find all bookings for the user
+  const bookings = await Booking.find({ user: req.user.id });
+
+  // 2. Extract all tour IDs
+  const tourIDs = bookings.map((b) => b.tour);
+
+  // 3. Get all the tours in one query
+  const tours = await Tour.find({ _id: { $in: tourIDs } });
+
+  res.status(200).json({
+    status: "success",
+    results: tours.length,
+    data: { tours },
   });
 });
