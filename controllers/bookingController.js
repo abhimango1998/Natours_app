@@ -74,13 +74,13 @@ exports.getAllBookedTours = catchAsync(async (req, res, next) => {
 
 const createBookingCheckout = async (session) => {
   const tour = session.client_reference_id;
-  const user = (await User.findOne({ email: session.customer_email }))._id;
-  const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
-    limit: 1,
-  });
-  const price = lineItems.data.price.unit_amount / 100;
-
-  await Booking.create({ tour, user, price });
+  const user = await User.findOne({ email: session.customer_email });
+  if (!user) {
+    console.log("User not found for email:", session.customer_email);
+    return;
+  }
+  const price = session.line_items.data[0].price.unit_amount / 100;
+  await Booking.create({ tour, user: user._id, price });
 };
 
 exports.webHookCheckout = catchAsync(async (req, res, next) => {
@@ -93,10 +93,19 @@ exports.webHookCheckout = catchAsync(async (req, res, next) => {
       process.env.STRIPE_WEBHOOK_SECRET,
     );
 
-    if (event.type === "checkout.session.completed")
-      await createBookingCheckout(event.data.object);
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
 
-    res.status(200).json({ status: "success" });
+      // fetch line items to get price info
+      const sessionWithLineItems = await stripe.checkout.sessions.retrieve(
+        session.id,
+        { expand: ["line_items"] },
+      );
+
+      await createBookingCheckout(sessionWithLineItems);
+    }
+
+    res.json({ received: true });
   } catch (error) {
     return res.status(400).send(`Webhook error: ${error.message}`);
   }
