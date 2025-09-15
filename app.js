@@ -13,6 +13,7 @@ const globalErrorHandler = require("./controllers/errorController");
 const tourRouter = require("./routes/tourRoutes");
 const reviewRouter = require("./routes/reviewRoutes");
 const bookingRouter = require("./routes/bookingRoutes");
+const { webHookCheckout } = require("./controllers/bookingController");
 
 const app = express();
 
@@ -39,6 +40,14 @@ const limiter = rateLimit({
   message: "Too many requests from an IP, please try in an hour!",
 });
 app.use("/api", limiter);
+
+// We need to specify this webHookCheckout function here because stripe needs the body in raw form, basically as a stream not as JSON.
+// So make sure this route hanlder is define before the express.json()
+app.post(
+  "/webhook-checkout",
+  express.raw({ type: "application/json" }),
+  webHookCheckout,
+);
 
 // Middleware to parse JSON bodies, and then makes available in req.body
 app.use(express.json({ limit: "10kb" }));
