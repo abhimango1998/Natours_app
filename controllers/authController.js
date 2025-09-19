@@ -7,25 +7,33 @@ const AppError = require("../utils/appError");
 const Email = require("../utils/email");
 
 const cookieOptions = {
-  maxAge: 90 * 24 * 60 * 60 * 1000,
+  maxAge: 15 * 60 * 1000,
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: "none",
   path: "/",
 };
 
-const signToken = (id) =>
+const refreshCookieOptions = {
+  ...cookieOptions,
+  maxAge: 90 * 24 * 60 * 60 * 1000,
+}
+
+const signToken = (id, expiresIn) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
+    expiresIn: expiresIn,
   });
 
 const createAndSendToken = (user, statusCode, res) => {
   user.password = undefined;
-  const token = signToken(user._id);
+  const token = signToken(user._id, process.env.JWT_EXPIRES_IN);
+  const refreshToken = signToken(user._id, process.env.JWT_REFRESH_EXPIRES_IN);
   res.cookie("jwt", token, cookieOptions);
+  res.cookie("jwtRefresh", refreshToken, refreshCookieOptions);
   res.status(statusCode).json({
     status: "success",
     token,
+    refreshToken,
     data: {
       user,
     },

@@ -28,6 +28,7 @@ const router = express.Router();
 // auth routes, login token not required
 router.post("/signup", signup);
 router.post("/login", login);
+// router.post("/refresh", );
 router.post("/logout", logout);
 router.post("/forgotPassword", forgotPassword);
 router.patch("/resetPassword/:token", resetPassword);
